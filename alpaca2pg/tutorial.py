@@ -6,9 +6,10 @@ from bonobo.config import use
 from alpaca_trade_api.rest import REST as AlpacaREST, TimeFrame
 
 
-def get_symbols():
-    yield 'AAPL'
-    yield 'TSLA'
+def get_symbols_from_env(symbols_env_name='ALP2PG_SYMBOLS'):
+    syms = os.getenv(symbols_env_name).strip().split(',')
+    for sym in syms:
+        yield sym
 
 
 @use('alpaca')
@@ -46,7 +47,7 @@ def get_graph(**options):
     """
     graph = bonobo.Graph()
     graph.add_chain(
-        get_symbols,
+        get_symbols_from_env,
         extract_bars_iter, 
         bonobo.Limit(5),
         bonobo.PrettyPrinter()
@@ -76,21 +77,8 @@ def run(**options):
     )
 
 
-def get_parser():
-    """Bonobo argument parser"""
-    parser = bonobo.get_argument_parser()
-    parser.add_argument('--ticker', help='ticker to pull',
-                        required=True)
-    parser.add_argument('--start-date', help='start date',
-                        required=True, type=lambda s: dt.strptime(s, '%Y-%m-%d').date())
-    parser.add_argument('--end-date', help='end date',
-                        required=False, type=lambda s: dt.strptime(s, '%Y-%m-%d').date(),
-                        default=dt.today().date())
-    return parser
-
-
 # The __main__ block actually execute the graph.
 if __name__ == '__main__':
-    parser = get_parser()
+    parser = bonobo.get_argument_parser()
     with bonobo.parse_args(parser) as options:
         run(**options)
