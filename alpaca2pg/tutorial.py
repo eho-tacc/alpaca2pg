@@ -6,11 +6,16 @@ from bonobo.config import use
 from alpaca_trade_api.rest import REST as AlpacaREST, TimeFrame
 
 
+def get_symbols():
+    yield 'AAPL'
+    yield 'TSLA'
+
+
 @use('alpaca')
-def extract_bars_iter(*rows, alpaca):
+def extract_bars_iter(symbol, alpaca):
     """Placeholder, change, rename, remove... """
     bar_iter = alpaca.get_bars_iter(
-        symbol='AAPL', 
+        symbol=symbol, 
         timeframe=TimeFrame.Minute, 
         start="2021-02-08", 
         end="2021-02-09", 
@@ -41,7 +46,9 @@ def get_graph(**options):
     """
     graph = bonobo.Graph()
     graph.add_chain(
+        get_symbols,
         extract_bars_iter, 
+        bonobo.Limit(5),
         bonobo.PrettyPrinter()
     )
     return graph
