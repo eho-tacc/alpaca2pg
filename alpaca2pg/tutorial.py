@@ -1,4 +1,5 @@
 import os
+from pdb import set_trace as st
 import bonobo
 from alpaca_trade_api.rest import REST as AlpacaREST
 
@@ -36,11 +37,12 @@ def get_graph(**options):
     return graph
 
 
-def get_alpaca_service():
+def get_alpaca_service(key_env_name="ALPACA_KEY_ID",
+                       secret_env_name="ALPACA_SECRET_KEY"):
     """Authenticates and returns an Alpaca REST interface"""
-    ALPACA_KEY_ID = os.getenv("ALPACA_KEY_ID")
-    ALPACA_SECRET_KEY = os.getenv("ALPACA_SECRET_KEY")
-    return AlpacaREST(key_id=ALPACA_KEY_ID, secret_key=ALPACA_SECRET_KEY)
+    return AlpacaREST(key_id=os.getenv(key_env_name), 
+                      secret_key=os.getenv(secret_env_name))
+
 
 def get_services(**options) -> dict:
     return dict(
