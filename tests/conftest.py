@@ -9,7 +9,7 @@ def dot_env() -> dict:
 
 
 @pytest.fixture
-def context(dot_env, monkeypatch):
+def env_context(dot_env, monkeypatch):
     """Emulates bonobo run --env-file .env"""
     for k, v in dot_env.items():
         monkeypatch.setenv(k, v)
