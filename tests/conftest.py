@@ -3,7 +3,8 @@ from dotenv import dotenv_values
 
 
 @pytest.fixture
-def dot_env(monkeypatch) -> dict:
+def dot_env() -> dict:
+    """.env by default"""
     return dotenv_values()
 
 

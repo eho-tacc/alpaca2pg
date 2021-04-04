@@ -4,11 +4,10 @@ import bonobo
 from alpaca_trade_api.rest import REST as AlpacaREST
 
 
-
-
-def extract():
+def extract(*rows):
     """Placeholder, change, rename, remove... """
-    yield 'hello'
+    # assert 0
+    yield 'Hello'
     yield 'world'
 
 
@@ -59,7 +58,6 @@ def run(**options):
 
 # The __main__ block actually execute the graph.
 if __name__ == '__main__':
-    """Main entrypoint"""
     parser = bonobo.get_argument_parser()
     with bonobo.parse_args(parser) as options:
         run(**options)
