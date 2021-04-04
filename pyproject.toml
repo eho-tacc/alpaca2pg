@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "alpaca2pg"
+version = "0.1.0"
+description = "Alpaca to PostgreSQL ETL"
+authors = ["Ethan Ho <eho@tacc.utexas.edu>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+bonobo = "^0.6.4"
+bonobo-sqlalchemy = "^0.6.1"
+bonobo-docker = "^0.6.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.3"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
