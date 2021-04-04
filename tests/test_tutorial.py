@@ -1,12 +1,15 @@
 import pytest
+import json
+from pprint import pprint as pp
 from alpaca2pg.tutorial import run
 
 
 @pytest.fixture
-def options():
+def options() -> dict:
     """Bonobo options"""
-    return dict()
+    d = dict()
+    return d
 
 
-def test_main(options):
+def test_run(options):
     run(**options)

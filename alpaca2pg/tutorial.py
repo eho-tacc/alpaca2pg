@@ -1,4 +1,8 @@
+import os
 import bonobo
+from alpaca_trade_api.rest import REST as AlpacaREST
+
+
 
 
 def extract():
@@ -24,25 +28,24 @@ def get_graph(**options):
     This function builds the graph that needs to be executed.
 
     :return: bonobo.Graph
-
     """
     graph = bonobo.Graph()
-    graph.add_chain(extract, transform, load)
-
+    graph.add_chain(
+        extract, transform, load
+    )
     return graph
 
 
-def get_services(**options):
-    """
-    This function builds the services dictionary, which is a simple dict of names-to-implementation used by bonobo
-    for runtime injection.
+def get_alpaca_service():
+    """Authenticates and returns an Alpaca REST interface"""
+    ALPACA_KEY_ID = os.getenv("ALPACA_KEY_ID")
+    ALPACA_SECRET_KEY = os.getenv("ALPACA_SECRET_KEY")
+    return AlpacaREST(key_id=ALPACA_KEY_ID, secret_key=ALPACA_SECRET_KEY)
 
-    It will be used on top of the defaults provided by bonobo (fs, http, ...). You can override those defaults, or just
-    let the framework define them. You can also define your own services and naming is up to you.
-
-    :return: dict
-    """
-    return {}
+def get_services(**options) -> dict:
+    return dict(
+        alpaca=get_alpaca_service()
+    )
 
 
 def run(**options):
