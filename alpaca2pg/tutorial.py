@@ -7,10 +7,10 @@ from alpaca_trade_api.rest import REST as AlpacaREST, TimeFrame
 
 
 @use('alpaca')
-def extract_bars_iter(alpaca, *rows):
+def extract_bars_iter(*rows, alpaca):
     """Placeholder, change, rename, remove... """
     bar_iter = alpaca.get_bars_iter(
-        symbol="AAPL", 
+        symbol='AAPL', 
         timeframe=TimeFrame.Minute, 
         start="2021-02-08", 
         end="2021-02-09", 

@@ -1,6 +1,5 @@
 import pytest
 import bonobo
-from pdb import set_trace as st
 from bonobo.execution.contexts import (
     NodeExecutionContext as NEC,
     GraphExecutionContext as GEC)
@@ -18,6 +17,6 @@ def test_extract_bars_iter(env_context):
     with NEC(extract_bars_iter, services=get_services()) as context:
         # Write a list of rows, including BEGIN/END control messages.
         context.write_sync(
-            'foo',
-            'bar'
+            'AAPL',
+            'TSLA'
         )
