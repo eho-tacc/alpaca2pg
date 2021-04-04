@@ -6,7 +6,7 @@ from alpaca_trade_api.rest import REST as AlpacaREST
 
 def extract(*rows):
     """Placeholder, change, rename, remove... """
-    # assert 0
+    assert 0
     yield 'Hello'
     yield 'world'
 
