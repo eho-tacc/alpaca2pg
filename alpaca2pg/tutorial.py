@@ -6,7 +6,7 @@ from bonobo.config import use
 from alpaca_trade_api.rest import REST as AlpacaREST, TimeFrame
 
 
-def get_symbols_from_env(symbols_env_name='ALP2PG_SYMBOLS') -> str:
+def symbols_from_env(symbols_env_name='ALP2PG_SYMBOLS') -> str:
     """Parses env with `symbols_env_name` as a comma separated list, and
     yields each ticker symbol.
     """
@@ -14,6 +14,20 @@ def get_symbols_from_env(symbols_env_name='ALP2PG_SYMBOLS') -> str:
     assert syms is not None
     for sym in syms.strip().split(','):
         yield sym
+
+
+def end_date_from_env(start_date_env_name='ALP2PG_END') -> date:
+    """Parses datetime from env `start_date_env_name`"""
+    s = os.getenv(start_date_env_name)
+    assert s is not None
+    yield dt.strptime(s, '%Y-%m-%d').date()
+
+
+def start_date_from_env(start_date_env_name='ALP2PG_START') -> date:
+    """Parses datetime from env `start_date_env_name`"""
+    s = os.getenv(start_date_env_name)
+    assert s is not None
+    yield dt.strptime(s, '%Y-%m-%d').date()
 
 
 @use('alpaca')
@@ -50,12 +64,20 @@ def get_graph(**options):
     :return: bonobo.Graph
     """
     graph = bonobo.Graph()
+
+    # Extraction pipeline for each ticker symbol
     graph.add_chain(
-        get_symbols_from_env,
+        symbols_from_env,
         extract_bars_iter, 
-        bonobo.Limit(5),
-        bonobo.PrettyPrinter()
-    )
+        bonobo.Limit(5), 
+        bonobo.PrettyPrinter(),
+        _name='pull_ts')
+
+    # Process arguments from env
+    # graph.add_chain(symbols_from_env, _output='pull_ts')
+    # graph.add_chain(start_date_from_env, _output='pull_ts')
+    # graph.add_chain(end_date_from_env, _output='pull_ts')
+
     return graph
 
 
