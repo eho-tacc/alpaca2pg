@@ -10,6 +10,7 @@ python = "^3.6"
 bonobo = "^0.6.4"
 bonobo-sqlalchemy = "^0.6.1"
 bonobo-docker = "^0.6.0"
+pytest-pythonpath = "^0.7.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.3"
