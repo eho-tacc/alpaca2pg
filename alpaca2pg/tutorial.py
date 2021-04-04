@@ -6,9 +6,13 @@ from bonobo.config import use
 from alpaca_trade_api.rest import REST as AlpacaREST, TimeFrame
 
 
-def get_symbols_from_env(symbols_env_name='ALP2PG_SYMBOLS'):
-    syms = os.getenv(symbols_env_name).strip().split(',')
-    for sym in syms:
+def get_symbols_from_env(symbols_env_name='ALP2PG_SYMBOLS') -> str:
+    """Parses env with `symbols_env_name` as a comma separated list, and
+    yields each ticker symbol.
+    """
+    syms = os.getenv(symbols_env_name)
+    assert syms is not None
+    for sym in syms.strip().split(','):
         yield sym
 
 
