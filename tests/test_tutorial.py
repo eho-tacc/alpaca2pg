@@ -3,7 +3,7 @@ import bonobo
 from bonobo.execution.contexts import (
     NodeExecutionContext as NEC,
     GraphExecutionContext as GEC)
-from alpaca2pg.tutorial import get_graph, get_services, extract_bars_iter, transform
+from alpaca2pg.tutorial import get_graph, get_services, extract_bars_iter
 
 
 @pytest.fixture

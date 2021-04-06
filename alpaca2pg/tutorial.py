@@ -6,79 +6,59 @@ from bonobo.config import use
 from alpaca_trade_api.rest import REST as AlpacaREST, TimeFrame
 
 
-def symbols_from_env(symbols_env_name='ALP2PG_SYMBOLS') -> str:
-    """Parses env with `symbols_env_name` as a comma separated list, and
-    yields each ticker symbol.
-    """
-    syms = os.getenv(symbols_env_name)
-    assert syms is not None
-    for sym in syms.strip().split(','):
-        yield sym
+def getenv(name) -> str:
+    """Fault intolerant getter from env"""
+    val = os.getenv(name)
+    if val is None:
+        raise bonobo.errors.UnrecoverableError(
+            f"Required input parameter `{name}` was not found as env var")
+    return val
 
 
-def end_date_from_env(start_date_env_name='ALP2PG_END') -> date:
-    """Parses datetime from env `start_date_env_name`"""
-    s = os.getenv(start_date_env_name)
-    assert s is not None
-    yield dt.strptime(s, '%Y-%m-%d').date()
+def env2date(env_name) -> date:
+    yield dt.strptime(getenv(env_name), '%Y-%m-%d').date()
 
 
-def start_date_from_env(start_date_env_name='ALP2PG_START') -> date:
-    """Parses datetime from env `start_date_env_name`"""
-    s = os.getenv(start_date_env_name)
-    assert s is not None
-    yield dt.strptime(s, '%Y-%m-%d').date()
+def env2timeframe(env_name='ALP2PG_TF'):
+    tf = getenv(env_name)
+    try:
+        return getattr(TimeFrame, tf)
+    except:
+        raise bonobo.errors.UnrecoverableError(
+            f"Invalid TimeFrame provided: {env_name}={tf}")
 
 
 @use('alpaca')
-def extract_bars_iter(symbol, alpaca):
-    """Placeholder, change, rename, remove... """
-    bar_iter = alpaca.get_bars_iter(
-        symbol=symbol, 
-        timeframe=TimeFrame.Minute, 
-        start="2021-02-08", 
-        end="2021-02-09", 
-        adjustment='raw',
-        limit=10, 
-        raw=True)
+def extract_bars_iter(alpaca):
+    """Get bars using Alpaca REST API"""
+    try:
+        bar_iter = alpaca.get_bars_iter(
+            symbol=getenv("ALP2PG_SYMBOL"), 
+            timeframe=env2timeframe(), 
+            start=env2date("ALP2PG_START"), 
+            end=env2date("ALP2PG_END"), 
+            adjustment='raw',
+            # limit=10, 
+            raw=True)
+    except:
+        # TODO: handling
+        raise
     for bar in bar_iter:
         yield bar
 
 
-def transform(*args):
-    """Placeholder, change, rename, remove... """
-    yield tuple(
-        map(str.title, args)
-    )
-
-
-def load(*args):
-    """Placeholder, change, rename, remove... """
-    print(*args)
-
-
 def get_graph(**options):
-    """
-    This function builds the graph that needs to be executed.
-
-    :return: bonobo.Graph
-    """
-    graph = bonobo.Graph()
+    """Get graph"""
+    g = bonobo.Graph()
 
     # Extraction pipeline for each ticker symbol
-    graph.add_chain(
-        symbols_from_env,
+    g.add_chain(
         extract_bars_iter, 
         bonobo.Limit(5), 
         bonobo.PrettyPrinter(),
         _name='pull_ts')
 
-    # Process arguments from env
-    # graph.add_chain(symbols_from_env, _output='pull_ts')
-    # graph.add_chain(start_date_from_env, _output='pull_ts')
-    # graph.add_chain(end_date_from_env, _output='pull_ts')
-
-    return graph
+    return g
 
 
 def get_alpaca_service(key_env_name="ALPACA_KEY_ID",
