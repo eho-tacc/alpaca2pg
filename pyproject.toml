@@ -10,6 +10,7 @@ python = "^3.6"
 pytest-pythonpath = "^0.7.3"
 alpaca-trade-api = "^1.1.0"
 petl = {extras = ["db", "pandas", "numpy"], version = "^1.7.4"}
+psycopg2 = "^2.8.6"
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.3"
