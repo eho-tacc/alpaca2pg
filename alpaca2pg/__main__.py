@@ -54,6 +54,7 @@ def main(override_db_conn=None, **opts):
      .fromdataframe(df) 
      .appenddb(dbo=conn, 
                tablename=get_tab_name(opts['ticker'], opts['timeframe'])))
+    logging.info(f"Successfully loaded data for ticker {opts['ticker']}")
 
 
 def get_opts():
