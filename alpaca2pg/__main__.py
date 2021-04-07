@@ -1,5 +1,4 @@
 import os
-import attr
 import argparse
 import petl
 import psycopg2
@@ -29,35 +28,30 @@ def get_sql(fname, sql_dir='sql') -> str:
         return f.read()
 
 
-@attr.s
-class PGHandler:
-    """Handles DB interactions"""
-    cur = attr.ib()
+def safe_append(cur, data, tab_name):
+    """Append `data` to table `tab_name`. Create table if it
+    does not exist.
+    """
+    if table_exists(cur, tab_name):
+        petl.appenddb(data, cur, tab_name)
+    else:
+        petl.todb(data, cur, tab_name, create=True)
 
-    def safe_append(self, data, tab_name):
-        """Append `data` to table `tab_name`. Create table if it
-        does not exist.
-        """
-        if self.table_exists(tab_name):
-            petl.appenddb(data, self.cur, tab_name)
-        else:
-            petl.todb(data, self.cur, tab_name, create=True)
 
-    def table_exists(self, tab_name) -> bool:
-        self.cur.execute(get_sql('table_exists.sql'), (tab_name,))
-        return bool(self.cur.fetchone()[0])
+def table_exists(cur, tab_name) -> bool:
+    cur.execute(get_sql('table_exists.sql'), (tab_name,))
+    return bool(cur.fetchone()[0])
 
 
 def main(conn):
     """Main entrypoint function"""
-    data = [['foo', 'bar'], 
+    cur = conn.cursor()
+    table = [['foo', 'bar'], 
              ['a', 1], 
              ['b', 2], 
              ['c', 2]]
     tab_name = 'foobar'
-    pgh = PGHandler(cur=conn.cursor())
-    pgh.safe_append(data, tab_name)
-    
+    safe_append(cur, table, tab_name)
 
 
 
