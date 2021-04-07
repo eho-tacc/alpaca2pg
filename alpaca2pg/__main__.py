@@ -69,7 +69,7 @@ def get_opts():
     p.add_argument('-e', '--end-date', help='end date', required=False, 
                    type=lambda s: dt.strptime(s, '%Y-%m-%d').date(), 
                    default=dt.today().date())
-    return p.parse_args()
+    return vars(p.parse_args())
 
 
 if __name__ == '__main__':

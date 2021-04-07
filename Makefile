@@ -1,9 +1,15 @@
 include config.mk
+PHONY := image tests tests-docker
 
-image:
+dist:
+	poetry build
+
+image: dist
 	docker build --rm -t $(DOCKER_IMAGE) .
 
-tests-docker:
-	docker run --rm -it $(DOCKER_IMAGE)
+tests-docker: image
+	docker run --rm -it --env-file .env $(DOCKER_IMAGE) \
+		-t AAPL -f Day -s 2021-03-01 -e 2021-04-01
+
 tests: tests-docker
 	tox --
