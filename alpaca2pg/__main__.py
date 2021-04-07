@@ -1,6 +1,8 @@
+import os
 import argparse
 import petl
 import psycopg2
+import pkg_resources
 from pdb import set_trace as st
 
 
@@ -16,10 +18,9 @@ def get_pg_conn(opts):
     return psycopg2.connect(get_pg_uri(**kw))
 
 
-def get_sql(fname, sql_dir=None) -> str:
+def get_sql(fname, sql_dir='sql') -> str:
     """Reads SQL query in file at `fname`."""
-    # DEBUG
-    fp = 'alpaca2pg/sql/test.sql'
+    fp = pkg_resources.resource_filename('alpaca2pg', os.path.join(sql_dir, fname))
     with open(fp, 'r', encoding='utf-8') as f:
         return f.read()
 
