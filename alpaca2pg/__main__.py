@@ -8,43 +8,9 @@ from datetime import datetime as dt, date
 from pdb import set_trace as st
 import logging
 from alpaca_trade_api.rest import REST as AlpacaREST, TimeFrame as TF
+from pgutils import *
 
 logging.basicConfig(level=logging.INFO)
-
-
-def get_pg_uri(user, password, host, port, dbname) -> str:
-    """Returns PostgreSQL URI-formatted string."""
-    return f'postgresql://{user}:{password}@{host}:{port}/{dbname}'
-
-
-def get_pg_conn():
-    """Connect to remote DB using credentials passed in command line"""
-    kw = {k: getenv(f"PG_{k.upper()}") for k in 
-          ('dbname', 'user', 'password', 'host', 'port')}
-    uri = get_pg_uri(**kw)
-    return psycopg2.connect(uri)
-
-
-def get_sql(fname, sql_dir='sql') -> str:
-    """Reads SQL query from file at `sql_dir`/`fname`."""
-    fp = pkg_resources.resource_filename('alpaca2pg', os.path.join(sql_dir, fname))
-    with open(fp, 'r', encoding='utf-8') as f:
-        return f.read()
-
-
-def safe_append(data, cur, tab_name):
-    """Append `data` to table `tab_name`. Create table if it
-    does not exist.
-    """
-    if table_exists(cur, tab_name):
-        petl.appenddb(data, cur, tab_name)
-    else:
-        petl.todb(data, cur, tab_name, create=True)
-
-
-def table_exists(cur, tab_name) -> bool:
-    cur.execute(get_sql('table_exists.sql'), (tab_name,))
-    return bool(cur.fetchone()[0])
 
 
 def getenv(name, permissive=False):
