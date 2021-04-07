@@ -2,23 +2,20 @@ import os
 import argparse
 import pandas
 import petl
-import psycopg2
-import pkg_resources
 from datetime import datetime as dt, date
 from pdb import set_trace as st
 import logging
 from alpaca_trade_api.rest import REST as AlpacaREST, TimeFrame as TF
-from pgutils import *
+from utils import getenv
+from pgutils import (
+    getenv,
+    get_pg_conn,
+    get_pg_uri,
+    get_sql,
+    safe_append,
+    table_exists)
 
 logging.basicConfig(level=logging.INFO)
-
-
-def getenv(name, permissive=False):
-    """Fault-intolerant fetcher from env."""
-    val = os.getenv(name)
-    if val is None and not permissive:
-        raise ValueError(f"Missing required input parameter from env: {name}")
-    return val.strip()
 
 
 def get_alpaca_client():
@@ -32,7 +29,7 @@ def main(ticker, timeframe, start_date, end_date):
     
     # pull bars from Alpaca API
     alpaca_client = get_alpaca_client()
-    bars = alpaca_client.get_bars(
+    df = alpaca_client.get_bars(
         symbol=ticker, 
         timeframe=getattr(TF, timeframe),
         start=start_date, 
@@ -41,12 +38,11 @@ def main(ticker, timeframe, start_date, end_date):
         # DEBUG
         # limit=10, 
     ).df
-    st()
-    tab_name = get_tab_name(ticker, timeframe)
 
     # Append data
     cur = get_pg_conn().cursor()
-    safe_append(data, cur, tab_name)
+    tab_name = get_tab_name(ticker, timeframe)
+    safe_append(df, cur, tab_name)
 
 
 def get_opts():
