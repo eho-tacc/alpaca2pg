@@ -3,6 +3,7 @@ import argparse
 import petl
 import psycopg2
 import pkg_resources
+from datetime import date, datetime as dt
 from pdb import set_trace as st
 import logging
 
@@ -16,19 +17,20 @@ def get_pg_uri(user, password, host, port, dbname) -> str:
 
 def get_pg_conn(opts):
     """Connect to remote DB using credentials passed in command line"""
-    kw = {k: getattr(opts, k) for k in 
+    kw = {k: getenv(f"PG_{k.upper()}") for k in 
           ('dbname', 'user', 'password', 'host', 'port')}
-    return psycopg2.connect(get_pg_uri(**kw))
+    uri = get_pg_uri(**kw)
+    return psycopg2.connect(uri)
 
 
 def get_sql(fname, sql_dir='sql') -> str:
-    """Reads SQL query in file at `fname`."""
+    """Reads SQL query from file at `sql_dir`/`fname`."""
     fp = pkg_resources.resource_filename('alpaca2pg', os.path.join(sql_dir, fname))
     with open(fp, 'r', encoding='utf-8') as f:
         return f.read()
 
 
-def safe_append(cur, data, tab_name):
+def safe_append(data, cur, tab_name):
     """Append `data` to table `tab_name`. Create table if it
     does not exist.
     """
@@ -43,16 +45,25 @@ def table_exists(cur, tab_name) -> bool:
     return bool(cur.fetchone()[0])
 
 
-def main(conn):
-    """Main entrypoint function"""
-    cur = conn.cursor()
-    table = [['foo', 'bar'], 
-             ['a', 1], 
-             ['b', 2], 
-             ['c', 2]]
-    tab_name = 'foobar'
-    safe_append(cur, table, tab_name)
+def getenv(name, permissive=False):
+    """Fault-intolerant fetcher from env."""
+    val = os.getenv(name)
+    if val is None and not permissive:
+        raise ValueError(f"Missing required input parameter from env: {name}")
+    return val
 
+
+def main(**opts):
+    """Main entrypoint function"""
+    cur = get_pg_conn(opts).cursor()
+    data = [['foo', 'bar'], 
+            ['a', 1], 
+            ['b', 2], 
+            ['c', 2]]
+    tab_name = 'foobar'
+
+    # Append data
+    safe_append(data, cur, tab_name)
 
 
 def get_opts():
@@ -61,14 +72,15 @@ def get_opts():
         description=("Pull historical quotes from Alpaca REST API to "
                      "PostgreSQL DB. Please see `pysopg2.connect` docs "
                      "for details."))
-    p.add_argument('--dbname', type=str, required=True)
-    p.add_argument('--user', type=str, required=True)
-    p.add_argument('--password', type=str, required=True)
-    p.add_argument('--host', type=str, required=True)
-    p.add_argument('--port', type=int, required=True)
-    return p.parse_args()
+    p.add_argument('-t', '--ticker', type=str, required=True)
+    p.add_argument('-s', '--start-date', help='start date', required=True, 
+                   type=lambda s: dt.strptime(s, '%Y-%m-%d').date())
+    p.add_argument('-e', '--end-date', help='end date', required=False, 
+                   type=lambda s: dt.strptime(s, '%Y-%m-%d').date(), 
+                   default=dt.today().date())
+    return vars(p.parse_args())
 
 
 if __name__ == '__main__':
     opts = get_opts()
-    main(conn=get_pg_conn(opts))
+    main(**opts)
