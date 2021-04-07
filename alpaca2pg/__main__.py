@@ -4,6 +4,9 @@ import petl
 import psycopg2
 import pkg_resources
 from pdb import set_trace as st
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
 
 
 def get_pg_uri(user, password, host, port, dbname) -> str:
@@ -24,14 +27,22 @@ def get_sql(fname, sql_dir='sql') -> str:
     with open(fp, 'r', encoding='utf-8') as f:
         return f.read()
 
+def table_exists(cur, tab_name) -> bool:
+    cur.execute(get_sql('table_exists.sql'), (tab_name,))
+    return bool(cur.fetchone()[0])
 
 def main(conn):
     """Main entrypoint function"""
-    table = (
-        petl
-        .fromdb(conn, get_sql('test.sql'))
-    )
-    print(table.look())
+    cur = conn.cursor()
+    table = [['foo', 'bar'], 
+             ['a', 1], 
+             ['b', 2], 
+             ['c', 2]]
+
+    tab_exists = table_exists(cur, 'foobar')
+    logging.debug(f'tab_exists: {tab_exists}')
+    # create table if DNE
+    # petl.appenddb(table, cur, tab_name)
 
 
 def get_opts():
