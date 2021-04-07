@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Alpaca to PostgreSQL ETL"
 authors = ["Ethan Ho <eho@tacc.utexas.edu>"]
 license = "MIT"
+include = ["alpaca2pg/sql/test.sql"]
 
 [tool.poetry.dependencies]
 python = "^3.6"

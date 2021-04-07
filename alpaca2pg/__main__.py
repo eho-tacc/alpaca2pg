@@ -16,11 +16,19 @@ def get_pg_conn(opts):
     return psycopg2.connect(get_pg_uri(**kw))
 
 
+def get_sql(fname, sql_dir=None) -> str:
+    """Reads SQL query in file at `fname`."""
+    # DEBUG
+    fp = 'alpaca2pg/sql/test.sql'
+    with open(fp, 'r', encoding='utf-8') as f:
+        return f.read()
+
+
 def main(conn):
     """Main entrypoint function"""
     table = (
         petl
-        .fromdb(conn, 'SELECT * FROM btc_prices')
+        .fromdb(conn, get_sql('test.sql'))
     )
     print(table.look())
 
