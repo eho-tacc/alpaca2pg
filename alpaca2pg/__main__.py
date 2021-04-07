@@ -7,15 +7,19 @@ from pdb import set_trace as st
 import logging
 from alpaca_trade_api.rest import REST as AlpacaREST, TimeFrame as TF
 from utils import getenv
-from pgutils import (
-    getenv,
-    get_pg_conn,
-    get_pg_uri,
-    get_sql,
-    safe_append,
-    table_exists)
+from pgutils import get_pg_conn, table_exists
 
 logging.basicConfig(level=logging.INFO)
+
+
+def safe_append(data, cur, tab_name):
+    """Append `data` to table `tab_name`. Create table if it
+    does not exist.
+    """
+    if table_exists(cur, tab_name):
+        petl.appenddb(data, cur, tab_name)
+    else:
+        petl.todb(data, cur, tab_name, create=True, dialect='postgresql')
 
 
 def get_alpaca_client():
@@ -24,9 +28,9 @@ def get_alpaca_client():
                       base_url=getenv('ALPACA_URL'))
 
 
-def get_tab_name(ticker, timeframe, sep='__'):
+def get_tab_name(ticker, timeframe, sep='.'):
     """description"""
-    return f"{ticker}{sep}1{timeframe.lower()}"
+    return f"{ticker}{sep}1{sep}{timeframe.lower()}"
 
 
 def main(ticker, timeframe, start_date, end_date):
@@ -47,7 +51,7 @@ def main(ticker, timeframe, start_date, end_date):
     # Append data
     cur = get_pg_conn().cursor()
     tab_name = get_tab_name(ticker, timeframe)
-    safe_append(df, cur, tab_name)
+    safe_append(petl.fromdataframe(df), cur, tab_name)
 
 
 def get_opts():

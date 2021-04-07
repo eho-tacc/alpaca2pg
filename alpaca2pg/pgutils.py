@@ -24,16 +24,6 @@ def get_sql(fname, sql_dir='sql', pkg_name='alpaca2pg') -> str:
         return f.read()
 
 
-def safe_append(data, cur, tab_name):
-    """Append `data` to table `tab_name`. Create table if it
-    does not exist.
-    """
-    if table_exists(cur, tab_name):
-        petl.appenddb(data, cur, tab_name)
-    else:
-        petl.todb(data, cur, tab_name, create=True)
-
-
 def table_exists(cur, tab_name) -> bool:
     cur.execute(get_sql('table_exists.sql'), (tab_name,))
     return bool(cur.fetchone()[0])
