@@ -43,12 +43,15 @@ def main(override_db_conn=None, **opts):
     """Main entrypoint function"""
     # pull bars from Alpaca as DataFrame
     df = get_alpaca_bars(**opts)
-    # DEBUG
-    df['time'] = df['time'].astype(str)
+
+    # convert types if DB conn override is set
+    if override_db_conn is None:
+        conn = psycopg2.connect(getenv("DB_URI"))
+    else:
+        conn = override_db_conn
+        df['time'] = df['time'].astype(str)
 
     # load bars into PostgreSQL DB
-    conn = (psycopg2.connect(getenv("DB_URI")) if override_db_conn is None
-        else override_db_conn)
     (
         petl
         .fromdataframe(df)
