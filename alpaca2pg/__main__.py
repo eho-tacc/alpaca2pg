@@ -3,7 +3,7 @@ import argparse
 import petl
 import psycopg2
 import pkg_resources
-from datetime import date, datetime as dt
+from datetime import datetime as dt, date
 from pdb import set_trace as st
 import logging
 
@@ -15,7 +15,7 @@ def get_pg_uri(user, password, host, port, dbname) -> str:
     return f'postgresql://{user}:{password}@{host}:{port}/{dbname}'
 
 
-def get_pg_conn(opts):
+def get_pg_conn():
     """Connect to remote DB using credentials passed in command line"""
     kw = {k: getenv(f"PG_{k.upper()}") for k in 
           ('dbname', 'user', 'password', 'host', 'port')}
@@ -53,9 +53,9 @@ def getenv(name, permissive=False):
     return val
 
 
-def main(**opts):
+def main(ticker, start_date, end_date):
     """Main entrypoint function"""
-    cur = get_pg_conn(opts).cursor()
+    cur = get_pg_conn().cursor()
     data = [['foo', 'bar'], 
             ['a', 1], 
             ['b', 2], 
