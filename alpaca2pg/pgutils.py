@@ -10,7 +10,7 @@ def get_pg_uri(user, password, host, port, dbname) -> str:
 
 
 def get_pg_conn():
-    """Connect to remote DB using credentials passed in command line"""
+    """Connect to remote DB using credentials in env"""
     kw = {k: getenv(f"PG_{k.upper()}") for k in 
           ('dbname', 'user', 'password', 'host', 'port')}
     uri = get_pg_uri(**kw)

@@ -5,6 +5,7 @@ import petl
 from datetime import datetime as dt, date
 from pdb import set_trace as st
 import logging
+import psycopg2
 from alpaca_trade_api.rest import REST as AlpacaREST, TimeFrame as TF
 from utils import getenv
 from pgutils import get_pg_conn, table_exists
@@ -47,7 +48,7 @@ def main(**opts):
     (
         petl
         .fromdataframe(df)
-        .appenddb(dbo=get_pg_conn(), 
+        .appenddb(dbo=psycopg2.connect(getenv("DB_URI")), 
                   tablename=get_tab_name(opts['ticker'], opts['timeframe']))
     )
 
