@@ -15,6 +15,8 @@ def env_context(dot_env, monkeypatch):
     """Get env file .env"""
     for k, v in dot_env.items():
         monkeypatch.setenv(k, v)
+        # DEBUG
+        # print(f'setting {k} to {v}')
 
 
 @pytest.fixture

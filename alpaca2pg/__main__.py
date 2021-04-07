@@ -1,11 +1,13 @@
 import os
 import argparse
+import pandas
 import petl
 import psycopg2
 import pkg_resources
 from datetime import datetime as dt, date
 from pdb import set_trace as st
 import logging
+from alpaca_trade_api.rest import REST as AlpacaREST, TimeFrame as TF
 
 logging.basicConfig(level=logging.INFO)
 
@@ -50,19 +52,34 @@ def getenv(name, permissive=False):
     val = os.getenv(name)
     if val is None and not permissive:
         raise ValueError(f"Missing required input parameter from env: {name}")
-    return val
+    return val.strip()
 
 
-def main(ticker, start_date, end_date):
+def get_alpaca_client():
+    return AlpacaREST(key_id=getenv('ALPACA_KEY_ID'), 
+                      secret_key=getenv('ALPACA_SECRET_KEY'), 
+                      base_url=getenv('ALPACA_URL'))
+
+
+def main(ticker, timeframe, start_date, end_date):
     """Main entrypoint function"""
-    cur = get_pg_conn().cursor()
-    data = [['foo', 'bar'], 
-            ['a', 1], 
-            ['b', 2], 
-            ['c', 2]]
-    tab_name = 'foobar'
+    
+    # pull bars from Alpaca API
+    alpaca_client = get_alpaca_client()
+    bars = alpaca_client.get_bars(
+        symbol=ticker, 
+        timeframe=getattr(TF, timeframe),
+        start=start_date, 
+        end=end_date, 
+        adjustment='raw',
+        # DEBUG
+        # limit=10, 
+    ).df
+    st()
+    tab_name = get_tab_name(ticker, timeframe)
 
     # Append data
+    cur = get_pg_conn().cursor()
     safe_append(data, cur, tab_name)
 
 
@@ -73,6 +90,8 @@ def get_opts():
                      "PostgreSQL DB. Please see `pysopg2.connect` docs "
                      "for details."))
     p.add_argument('-t', '--ticker', type=str, required=True)
+    p.add_argument('-f', '--timeframe', type=str, required=True,
+                   choices=['Minute', 'Hour', 'Day'])
     p.add_argument('-s', '--start-date', help='start date', required=True, 
                    type=lambda s: dt.strptime(s, '%Y-%m-%d').date())
     p.add_argument('-e', '--end-date', help='end date', required=False, 
