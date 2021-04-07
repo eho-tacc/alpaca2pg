@@ -25,18 +25,16 @@ def get_tab_name(ticker, timeframe, sep='_'):
 
 
 def get_alpaca_bars(ticker, timeframe, start_date, end_date) -> pd.DataFrame:
-    return (
-        get_alpaca_client()
-        .get_bars(
-            symbol=ticker, 
-            timeframe=getattr(TF, timeframe),
-            start=start_date, 
-            end=end_date, 
-            adjustment='raw')
-        .df
-        .reset_index()
-        .rename(columns=dict(timestamp='time'))
-    )
+    return (get_alpaca_client() 
+            .get_bars(
+                symbol=ticker, 
+                timeframe=getattr(TF, timeframe),
+                start=start_date, 
+                end=end_date, 
+                adjustment='raw')
+            .df
+            .reset_index()
+            .rename(columns=dict(timestamp='time')))
 
 
 def main(override_db_conn=None, **opts):
@@ -52,12 +50,10 @@ def main(override_db_conn=None, **opts):
         df['time'] = df['time'].astype(str)
 
     # load bars into PostgreSQL DB
-    (
-        petl
-        .fromdataframe(df)
-        .appenddb(dbo=conn, 
-                  tablename=get_tab_name(opts['ticker'], opts['timeframe']))
-    )
+    (petl 
+     .fromdataframe(df) 
+     .appenddb(dbo=conn, 
+               tablename=get_tab_name(opts['ticker'], opts['timeframe'])))
 
 
 def get_opts():
