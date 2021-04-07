@@ -7,8 +7,8 @@ from pdb import set_trace as st
 import logging
 import psycopg2
 from alpaca_trade_api.rest import REST as AlpacaREST, TimeFrame as TF
-from utils import getenv
-from pgutils import get_pg_conn, table_exists
+from .utils import getenv
+from .pgutils import get_pg_conn, table_exists
 
 logging.basicConfig(level=logging.INFO)
 

@@ -1,7 +1,7 @@
 import os
 import psycopg2
 import pkg_resources
-from utils import getenv
+from .utils import getenv
 
 
 def get_pg_uri(user, password, host, port, dbname) -> str:
