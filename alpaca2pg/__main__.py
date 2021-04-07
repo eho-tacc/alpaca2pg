@@ -39,16 +39,20 @@ def get_alpaca_bars(ticker, timeframe, start_date, end_date) -> pd.DataFrame:
     )
 
 
-def main(**opts):
+def main(override_db_conn=None, **opts):
     """Main entrypoint function"""
     # pull bars from Alpaca as DataFrame
     df = get_alpaca_bars(**opts)
+    # DEBUG
+    df['time'] = df['time'].astype(str)
 
     # load bars into PostgreSQL DB
+    conn = (psycopg2.connect(getenv("DB_URI")) if override_db_conn is None
+        else override_db_conn)
     (
         petl
         .fromdataframe(df)
-        .appenddb(dbo=psycopg2.connect(getenv("DB_URI")), 
+        .appenddb(dbo=conn, 
                   tablename=get_tab_name(opts['ticker'], opts['timeframe']))
     )
 
