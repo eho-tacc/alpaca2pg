@@ -24,6 +24,11 @@ def get_alpaca_client():
                       base_url=getenv('ALPACA_URL'))
 
 
+def get_tab_name(ticker, timeframe, sep='__'):
+    """description"""
+    return f"{ticker}{sep}1{timeframe.lower()}"
+
+
 def main(ticker, timeframe, start_date, end_date):
     """Main entrypoint function"""
     
