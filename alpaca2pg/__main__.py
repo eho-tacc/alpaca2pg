@@ -1,6 +1,6 @@
 import os
 import argparse
-import pandas
+import pandas as pd
 import petl
 from datetime import datetime as dt, date
 from pdb import set_trace as st
@@ -33,25 +33,30 @@ def get_tab_name(ticker, timeframe, sep='.'):
     return f"{ticker}{sep}1{sep}{timeframe.lower()}"
 
 
-def main(ticker, timeframe, start_date, end_date):
-    """Main entrypoint function"""
-    
-    # pull bars from Alpaca API
-    alpaca_client = get_alpaca_client()
-    df = alpaca_client.get_bars(
-        symbol=ticker, 
-        timeframe=getattr(TF, timeframe),
-        start=start_date, 
-        end=end_date, 
-        adjustment='raw',
-        # DEBUG
-        # limit=10, 
-    ).df
+def get_alpaca_bars(ticker, timeframe, start_date, end_date) -> pd.DataFrame:
+    return (
+        get_alpaca_client()
+        .get_bars(
+            symbol=ticker, 
+            timeframe=getattr(TF, timeframe),
+            start=start_date, 
+            end=end_date, 
+            adjustment='raw')
+        .df
+        .reset_index()
+        .rename(columns=dict(timestamp='time'))
+    )
 
-    # Append data
+
+def main(**opts):
+    """Main entrypoint function"""
+    df = get_alpaca_bars(**opts)
+    table = petl.fromdataframe(df)
+
+    # Append data to table
     cur = get_pg_conn().cursor()
-    tab_name = get_tab_name(ticker, timeframe)
-    safe_append(petl.fromdataframe(df), cur, tab_name)
+    tab_name = get_tab_name(opts['ticker'], opts['timeframe'])
+    safe_append(table, cur, tab_name)
 
 
 def get_opts():
@@ -68,7 +73,7 @@ def get_opts():
     p.add_argument('-e', '--end-date', help='end date', required=False, 
                    type=lambda s: dt.strptime(s, '%Y-%m-%d').date(), 
                    default=dt.today().date())
-    return vars(p.parse_args())
+    return p.parse_args()
 
 
 if __name__ == '__main__':
