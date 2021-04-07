@@ -12,25 +12,15 @@ from pgutils import get_pg_conn, table_exists
 logging.basicConfig(level=logging.INFO)
 
 
-def safe_append(data, cur, tab_name):
-    """Append `data` to table `tab_name`. Create table if it
-    does not exist.
-    """
-    if table_exists(cur, tab_name):
-        petl.appenddb(data, cur, tab_name)
-    else:
-        petl.todb(data, cur, tab_name, create=True, dialect='postgresql')
-
-
 def get_alpaca_client():
     return AlpacaREST(key_id=getenv('ALPACA_KEY_ID'), 
                       secret_key=getenv('ALPACA_SECRET_KEY'), 
                       base_url=getenv('ALPACA_URL'))
 
 
-def get_tab_name(ticker, timeframe, sep='.'):
-    """description"""
-    return f"{ticker}{sep}1{sep}{timeframe.lower()}"
+def get_tab_name(ticker, timeframe, sep='_'):
+    """Returns Postgres-friendly table name e.g. aapl_1_day"""
+    return f"{ticker}{sep}1{sep}{timeframe}".lower()
 
 
 def get_alpaca_bars(ticker, timeframe, start_date, end_date) -> pd.DataFrame:
@@ -50,21 +40,23 @@ def get_alpaca_bars(ticker, timeframe, start_date, end_date) -> pd.DataFrame:
 
 def main(**opts):
     """Main entrypoint function"""
+    # pull bars from Alpaca as DataFrame
     df = get_alpaca_bars(**opts)
-    table = petl.fromdataframe(df)
 
-    # Append data to table
-    cur = get_pg_conn().cursor()
-    tab_name = get_tab_name(opts['ticker'], opts['timeframe'])
-    safe_append(table, cur, tab_name)
+    # load bars into PostgreSQL DB
+    (
+        petl
+        .fromdataframe(df)
+        .appenddb(dbo=get_pg_conn(), 
+                  tablename=get_tab_name(opts['ticker'], opts['timeframe']))
+    )
 
 
 def get_opts():
     """Get command line options from argparse"""
     p = argparse.ArgumentParser(
         description=("Pull historical quotes from Alpaca REST API to "
-                     "PostgreSQL DB. Please see `pysopg2.connect` docs "
-                     "for details."))
+                     "PostgreSQL DB."))
     p.add_argument('-t', '--ticker', type=str, required=True)
     p.add_argument('-f', '--timeframe', type=str, required=True,
                    choices=['Minute', 'Hour', 'Day'])
