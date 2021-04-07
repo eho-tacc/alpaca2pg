@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "alpaca2pg"
-version = "0.1.0"
+version = "1.0.0"
 description = "Alpaca to PostgreSQL ETL"
 authors = ["Ethan Ho <eho@tacc.utexas.edu>"]
 license = "MIT"
