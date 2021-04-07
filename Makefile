@@ -1,7 +1,7 @@
 include config.mk
-PHONY := image tests tests-docker
+PHONY := clean image tests tests-docker
 
-dist:
+dist: clean
 	poetry build
 
 image: dist
@@ -13,3 +13,6 @@ tests-docker: image
 
 tests: tests-docker
 	tox --
+
+clean:
+	rm -rf dist
