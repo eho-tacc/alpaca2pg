@@ -7,7 +7,7 @@ license = "MIT"
 include = ["alpaca2pg/sql/*.sql"]
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = "^3.7"
 pytest-pythonpath = "^0.7.3"
 alpaca-trade-api = "^1.1.0"
 petl = {extras = ["db", "pandas", "numpy"], version = "^1.7.4"}
