@@ -4,6 +4,7 @@ from alpaca2pg.__main__ import main
 from datetime import datetime as dt, date
 
 
+@pytest.mark.live_db
 def test_main(env_context):
     """Runs main entrypoint on live DB."""
     start_date = dt.strptime('2020-10-01', '%Y-%m-%d').date()
