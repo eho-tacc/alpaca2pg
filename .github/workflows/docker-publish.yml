@@ -10,6 +10,7 @@ env:
   DOCKER_ORG: quantrams
   DOCKER_REPO: alpaca2pg
   DOCKER_TAG: 1.0.0
+  DOCKER_IMAGE: ${{ env.DOCKER_ORG }}/${{ env.DOCKER_REPO }}:${{ env.DOCKER_TAG }}
 
 jobs:
 
@@ -29,7 +30,7 @@ jobs:
         run: |
           apt-get update
           apt-get install -yq libpq-dev gcc
-      
+
       # test & build
       - name: Run tests in poetry env
         run: |
@@ -53,4 +54,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ env.DOCKER_ORG }}/${{ env.DOCKER_REPO }}:${{ env.DOCKER_TAG }}
+          tags: ${{ env.DOCKER_IMAGE }}
