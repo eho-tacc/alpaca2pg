@@ -1,5 +1,7 @@
 # alpaca2pg
 
+[![Docker publish](https://github.com/quantrams/alpaca2pg/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/quantrams/alpaca2pg/actions/workflows/docker-publish.yml)
+
 Loads data from an [Alpaca v1 API](https://github.com/alpacahq/alpaca-trade-api-python) query to a PostgreSQL database. 
 
 ## Features
@@ -61,7 +63,7 @@ docker run --env-file .env quantrams/alpaca2pg:latest --help
     ```
 - Run tests only (no push) using [act](https://github.com/nektos/act)
     ```bash
-    act pull_request`
+    act pull_request
     ```
 
 [1]: ./example.env
